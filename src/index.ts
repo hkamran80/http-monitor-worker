@@ -232,8 +232,6 @@ severity: down
             return null;
         };
 
-        pingHealthchecks("start");
-
         const issues = await getGithubIssues();
         if (issues.status === 200) {
             const isOnline = await getOnlineStatus();
@@ -246,10 +244,6 @@ severity: down
                         console.log("Successfully created issue.");
                         sendDiscordMessage(isOnline);
 
-                        pingHealthchecks(
-                            "log",
-                            `Outage detected for ${env.SERVICE_NAME} - created issue and file`,
-                        );
                         pingHealthchecks("success");
                     } else {
                         pingHealthchecks(
@@ -283,11 +277,6 @@ severity: down
                     console.log("Successfully closed issue.");
 
                     sendDiscordMessage(isOnline);
-
-                    pingHealthchecks(
-                        "log",
-                        `Uptime detected for ${env.SERVICE_NAME} - updated file and closed issue`,
-                    );
                     pingHealthchecks("success");
                 } else {
                     console.log(update);

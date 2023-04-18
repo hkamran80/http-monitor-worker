@@ -32,6 +32,7 @@ export interface Env {
     GITHUB_APP_ID: number;
     GITHUB_APP_INSTALLATION_ID: number;
     DISCORD_WEBHOOK_URL?: string;
+    HEALTHCHECKS_URL?: string;
 }
 
 export default {
@@ -207,6 +208,35 @@ severity: down
             }
         };
 
+        const pingHealthchecks = async (
+            type: "start" | "success" | "failure" | "log",
+            message?: string,
+        ) => {
+            if (env.HEALTHCHECKS_URL) {
+                let healthchecksUrl = env.HEALTHCHECKS_URL;
+                let options: RequestInit = {};
+                if (type === "start") {
+                    healthchecksUrl += "/start";
+                } else if (type === "failure") {
+                    healthchecksUrl += "/fail";
+                } else if (type === "log") {
+                    healthchecksUrl += "/log";
+                    options = {
+                        method: "POST",
+                        headers: { "Content-Type": "text/plain" },
+                        body: message,
+                    };
+                }
+
+                const response = await fetch(healthchecksUrl, options);
+                return response.ok;
+            }
+
+            return null;
+        };
+
+        pingHealthchecks("start");
+
         const issues = await getGithubIssues();
         if (issues.status === 200) {
             const isOnline = await getOnlineStatus();
@@ -218,7 +248,25 @@ severity: down
                     if (createIssue.status === 201) {
                         console.log("Successfully created issue.");
                         sendDiscordMessage(isOnline);
+
+                        pingHealthchecks(
+                            "log",
+                            `Outage detected for ${env.SERVICE_NAME} - created issue and file`,
+                        );
+                        pingHealthchecks("success");
+                    } else {
+                        pingHealthchecks(
+                            "log",
+                            "Issue creation did not return HTTP 201",
+                        );
+                        pingHealthchecks("failure");
                     }
+                } else {
+                    pingHealthchecks(
+                        "log",
+                        "Issue file creation did not return a filename/hash, unable to create issue",
+                    );
+                    pingHealthchecks("failure");
                 }
             } else if (isOnline && issues.data.length > 0) {
                 const body = issues.data[0].body as string;
@@ -238,10 +286,26 @@ severity: down
                     console.log("Successfully closed issue.");
 
                     sendDiscordMessage(isOnline);
+
+                    pingHealthchecks(
+                        "log",
+                        `Uptime detected for ${env.SERVICE_NAME} - updated file and closed issue`,
+                    );
+                    pingHealthchecks("success");
                 } else {
                     console.log(update);
+                    pingHealthchecks(
+                        "log",
+                        "Issue file update did not finish with HTTP status code 200",
+                    );
+                    pingHealthchecks("failure");
                 }
             }
+
+            pingHealthchecks("success");
+        } else {
+            pingHealthchecks("log", "Unable to retrieve issues");
+            pingHealthchecks("failure");
         }
     },
 };

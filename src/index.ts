@@ -1,13 +1,19 @@
 /**
- * Welcome to Cloudflare Workers! This is your first scheduled worker.
- *
- * - Run `wrangler dev --local` in your terminal to start a development server
- * - Run `curl "http://localhost:8787/cdn-cgi/mf/scheduled"` to trigger the scheduled event
- * - Go back to the console to see what your worker has logged
- * - Update the Cron trigger in wrangler.toml (see https://developers.cloudflare.com/workers/wrangler/configuration/#triggers)
- * - Run `wrangler publish --name my-worker` to publish your worker
- *
- * Learn more at https://developers.cloudflare.com/workers/runtime-apis/scheduled-event/
+ * HTTP Monitor Bot
+ * Copyright (C) 2023 H. Kamran (https://hkamran.com)
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 import { slugify } from "@hkamran/utility-strings";
@@ -15,15 +21,6 @@ import { createAppAuth } from "@octokit/auth-app";
 import { Octokit } from "@octokit/rest";
 
 export interface Env {
-    // Example binding to KV. Learn more at https://developers.cloudflare.com/workers/runtime-apis/kv/
-    // MY_KV_NAMESPACE: KVNamespace;
-    //
-    // Example binding to Durable Object. Learn more at https://developers.cloudflare.com/workers/runtime-apis/durable-objects/
-    // MY_DURABLE_OBJECT: DurableObjectNamespace;
-    //
-    // Example binding to R2. Learn more at https://developers.cloudflare.com/workers/runtime-apis/r2/
-    // MY_BUCKET: R2Bucket;
-
     CHECK_URL: string;
     ISSUE_LABEL: string;
     SERVICE_NAME: string;

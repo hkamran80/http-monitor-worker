@@ -1,0 +1,30 @@
+{
+    "name": "http-monitor-worker",
+    "version": "0.0.0",
+    "devDependencies": {
+        "@cloudflare/workers-types": "^4.20230404.0",
+        "@hkamran/prettier-config": "^1.1.1",
+        "prettier": "^2.8.7",
+        "typescript": "^5.0.4",
+        "wrangler": "2.15.1"
+    },
+    "private": true,
+    "scripts": {
+        "start": "wrangler dev",
+        "deploy": "wrangler publish",
+        "format": "prettier . --write"
+    },
+    "author": {
+        "name": "H. Kamran",
+        "email": "hkamran@hkamran.com",
+        "url": "https://hkamran.com"
+    },
+    "license": "AGPLv3.0-or-later",
+    "prettier": "@hkamran/prettier-config",
+    "dependencies": {
+        "@hkamran/utility-strings": "^1.0.2",
+        "@octokit/auth-app": "^4.0.9",
+        "@octokit/core": "^4.2.0",
+        "@octokit/rest": "^19.0.7"
+    }
+}

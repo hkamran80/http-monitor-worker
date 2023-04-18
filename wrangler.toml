@@ -1,0 +1,6 @@
+name = "http-monitor-worker"
+main = "src/index.ts"
+compatibility_date = "2023-04-17"
+
+[triggers]
+crons = ["*/15 * * * *"]

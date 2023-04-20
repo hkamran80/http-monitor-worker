@@ -13,7 +13,6 @@ with the status.
 ### Optional
 
 - Discord webhook URL (Channel Settings > Integrations > Webhooks)
-- [Healthchecks.io](https://healthchecks.io/) (self-hosted or hosted)
 
 ## Installation
 
@@ -62,7 +61,6 @@ with the status.
     - `GITHUB_APP_INSTALLATION_ID`: the installation ID you noted down in step 6
     - `DISCORD_WEBHOOK_URL` (optional): the Discord URL that the Worker should send
       messages to when it detects changes in the service's status
-    - `HEALTHCHECKS_URL` (optional): the ping URL for Healthchecks.io
 
 ## License
 

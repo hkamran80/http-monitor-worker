@@ -1,17 +1,17 @@
 /**
  * HTTP Monitor Bot
  * Copyright (C) 2023 H. Kamran (https://hkamran.com)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
@@ -29,7 +29,6 @@ export interface Env {
     GITHUB_APP_ID: number;
     GITHUB_APP_INSTALLATION_ID: number;
     DISCORD_WEBHOOK_URL?: string;
-    HEALTHCHECKS_URL?: string;
 }
 
 export default {
@@ -205,33 +204,6 @@ severity: down
             }
         };
 
-        const pingHealthchecks = async (
-            type: "start" | "success" | "failure" | "log",
-            message?: string,
-        ) => {
-            if (env.HEALTHCHECKS_URL) {
-                let healthchecksUrl = env.HEALTHCHECKS_URL;
-                let options: RequestInit = {};
-                if (type === "start") {
-                    healthchecksUrl += "/start";
-                } else if (type === "failure") {
-                    healthchecksUrl += "/fail";
-                } else if (type === "log") {
-                    healthchecksUrl += "/log";
-                    options = {
-                        method: "POST",
-                        headers: { "Content-Type": "text/plain" },
-                        body: message,
-                    };
-                }
-
-                const response = await fetch(healthchecksUrl, options);
-                return response.ok;
-            }
-
-            return null;
-        };
-
         const issues = await getGithubIssues();
         if (issues.status === 200) {
             const isOnline = await getOnlineStatus();
@@ -243,21 +215,15 @@ severity: down
                     if (createIssue.status === 201) {
                         console.log("Successfully created issue.");
                         sendDiscordMessage(isOnline);
-
-                        pingHealthchecks("success");
                     } else {
-                        pingHealthchecks(
-                            "log",
+                        throw new Error(
                             "Issue creation did not return HTTP 201",
                         );
-                        pingHealthchecks("failure");
                     }
                 } else {
-                    pingHealthchecks(
-                        "log",
+                    throw new Error(
                         "Issue file creation did not return a filename/hash, unable to create issue",
                     );
-                    pingHealthchecks("failure");
                 }
             } else if (isOnline && issues.data.length > 0) {
                 const body = issues.data[0].body as string;
@@ -277,21 +243,15 @@ severity: down
                     console.log("Successfully closed issue.");
 
                     sendDiscordMessage(isOnline);
-                    pingHealthchecks("success");
                 } else {
                     console.log(update);
-                    pingHealthchecks(
-                        "log",
+                    throw new Error(
                         "Issue file update did not finish with HTTP status code 200",
                     );
-                    pingHealthchecks("failure");
                 }
             }
-
-            pingHealthchecks("success");
         } else {
-            pingHealthchecks("log", "Unable to retrieve issues");
-            pingHealthchecks("failure");
+            throw new Error("Unable to retrieve issues");
         }
     },
 };
